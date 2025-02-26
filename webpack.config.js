@@ -1,5 +1,4 @@
 const path = require('path');
-const CleanWebpackPlugin = require('webpack-cli');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -8,6 +7,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: 'bundle.[contenthash].js',
+    clean: true
   },
   module: {
     rules: [
@@ -21,14 +21,13 @@ module.exports = {
     ],
   },
   plugins: [
-    new CleanWebpackPlugin(),
     new CopyWebpackPlugin({
       patterns: [
         { from: 'public', to: 'build', globOptions: { ignore: ['**/index.html'] } },
       ],
     }),
     new HtmlWebpackPlugin({
-      template: './src/index.html',
+      template: './public/index.html',
       filename: 'index.html',
     }),
   ],
