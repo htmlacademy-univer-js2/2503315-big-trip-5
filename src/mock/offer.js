@@ -3,7 +3,7 @@ import { EVENT_TYPES, OFFERS } from '../const.js';
 
 const MIN_PRICE = 10;
 const MAX_PRICE = 1000;
-function getRandomOffer(){
+function getRandomOffer() {
   return {
     type: getRandomArrayElement(EVENT_TYPES),
     title: getRandomArrayElement(OFFERS),
