@@ -4,7 +4,9 @@ import PointView from '../view/point-view.js';
 import PointListView from '../view/point-list-view.js';
 import PointCreationView from '../view/point-creation-view.js';
 import PointEditorView from '../view/point-editor-view.js';
+import EmptyPointListView from '../view/empty-point-list-view.js';
 import { render, replace } from '../framework/render.js';
+import { generateFilters } from '../mock/filters.js';
 
 export default class MainPresenter {
   #pointListComponent = new PointListView();
@@ -12,6 +14,7 @@ export default class MainPresenter {
   #eventsContainer = null;
   #pointsModel = null;
   #points = null;
+  #filters = null;
 
   constructor({filtersContainer, eventsContainer, pointsModel}) {
     this.#filtersContainer = filtersContainer;
@@ -21,13 +24,18 @@ export default class MainPresenter {
 
   init() {
     this.#points = this.#pointsModel.points;
+    this.#filters = generateFilters(this.#points);
 
     render(this.#pointListComponent, this.#eventsContainer);
-    //render(new PointEditorView({point: this.points[0]}), this.pointListComponent.element);
     render(new SortView(), this.#eventsContainer);
-    render(new FilterView(), this.#filtersContainer);
+    render(new FilterView({filters: this.#filters}), this.#filtersContainer);
 
-    this.#points.forEach((point) => this.#renderPoint(point));
+    if (this.#points.length > 0) {
+      this.#points.forEach((point) => this.#renderPoint(point));
+    } else {
+      render(new EmptyPointListView(), this.#pointListComponent.element);
+    }
+
 
     render(new PointCreationView(), this.#pointListComponent.element);
   }

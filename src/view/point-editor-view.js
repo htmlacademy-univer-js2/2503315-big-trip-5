@@ -1,6 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { getFullDate } from '../utils/utils.js';
-import { EVENT_TYPES, CITIES } from '../const.js';
+import { EVENT_TYPES, CITIES } from '../const/points-const.js';
 
 function createFormEditorTemplate(point) {
   const {eventType, destination, startDatetime, endDatetime, price, offers} = point;

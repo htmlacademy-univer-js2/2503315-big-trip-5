@@ -51,4 +51,20 @@ const getMonthAndDate = (date) => dayjs(date).format('MMM DD');
 
 const getFullDate = (date) => dayjs(date).format('DD/MM/YY HH:mm');
 
-export {getRandomArrayElement, getRandomInteger, getRandomDates, getTime, getMonthAndDate, getFullDate, getDateDifference};
+const isFuturePoint = (date) => dayjs(date).isAfter(dayjs());
+
+const isExpiredPoint = (date) => dayjs(date).isBefore(dayjs());
+
+const isActualPoint = (dateFrom, dateTo) => dayjs(dateFrom).isBefore(dayjs()) && dayjs(dateTo).isAfter(dayjs());
+
+export {
+  getRandomArrayElement,
+  getRandomInteger,
+  getRandomDates,
+  getTime,
+  getMonthAndDate,
+  getFullDate,
+  getDateDifference,
+  isFuturePoint,
+  isActualPoint,
+  isExpiredPoint};
