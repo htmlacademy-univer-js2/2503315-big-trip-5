@@ -1,5 +1,5 @@
 import {getRandomArrayElement, getRandomInteger} from '../utils/utils.js';
-import {CITIES, DESCRIPTIONS} from '../const.js';
+import {CITIES, DESCRIPTIONS} from '../const/points-const.js';
 
 const MIN_DESCRIPTION_COUNT = 1;
 const MAX_DESCRIPTION_COUNT = 5;

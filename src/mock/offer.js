@@ -1,5 +1,5 @@
 import {getRandomArrayElement, getRandomInteger} from '../utils/utils.js';
-import { EVENT_TYPES, OFFERS } from '../const.js';
+import { EVENT_TYPES, OFFERS } from '../const/points-const.js';
 
 const MIN_PRICE = 10;
 const MAX_PRICE = 1000;
