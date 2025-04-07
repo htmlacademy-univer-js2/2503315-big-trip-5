@@ -4,7 +4,7 @@ import {CITIES, DESCRIPTIONS} from '../const/points-const.js';
 const MIN_DESCRIPTION_COUNT = 1;
 const MAX_DESCRIPTION_COUNT = 5;
 const MIN_PICTURE_COUNT = 1;
-const MAX_PICTURE_COUNT = 5;
+const MAX_PICTURE_COUNT = 3;
 
 const getRandomDestination = () => ({
   description: Array.from({length: getRandomInteger(MIN_DESCRIPTION_COUNT, MAX_DESCRIPTION_COUNT)}, () => getRandomArrayElement(DESCRIPTIONS)).join(' '),

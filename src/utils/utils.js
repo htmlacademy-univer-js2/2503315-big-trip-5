@@ -57,6 +57,15 @@ const isExpiredPoint = (date) => dayjs(date).isBefore(dayjs());
 
 const isActualPoint = (dateFrom, dateTo) => dayjs(dateFrom).isBefore(dayjs()) && dayjs(dateTo).isAfter(dayjs());
 
+const updatePoint = (points, updatedPoint) => points.map((point) => {
+  if (point.id === updatedPoint.id) {
+    return updatePoint;
+  } else {
+    return point;
+  }
+});
+
+
 export {
   getRandomArrayElement,
   getRandomInteger,
@@ -67,4 +76,5 @@ export {
   getDateDifference,
   isFuturePoint,
   isActualPoint,
-  isExpiredPoint};
+  isExpiredPoint,
+  updatePoint};
