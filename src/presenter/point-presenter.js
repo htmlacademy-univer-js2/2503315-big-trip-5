@@ -1,6 +1,6 @@
 import PointView from '../view/point-view.js';
 import PointEditorView from '../view/point-editor-view.js';
-import { render, replace, remove } from '../framework/render.js';
+import { render, replace, remove, RenderPosition } from '../framework/render.js';
 import { MODE } from '../const/points-const.js';
 
 export default class PointPresenter {
@@ -37,7 +37,7 @@ export default class PointPresenter {
     });
 
     if (!prevPointItem || !prevEditForm) {
-      render(this.#pointItem, this.#pointListComponent.element);
+      render(this.#pointItem, this.#pointListComponent.element, RenderPosition.AFTERBEGIN);
       return;
     }
 
