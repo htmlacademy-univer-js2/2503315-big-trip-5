@@ -51,19 +51,19 @@ const getMonthAndDate = (date) => dayjs(date).format('MMM DD');
 
 const getFullDate = (date) => dayjs(date).format('DD/MM/YY HH:mm');
 
-const isFuturePoint = (date) => dayjs(date).isAfter(dayjs());
+const isFuturePoint = (date) => dayjs().isBefore(date);
 
-const isExpiredPoint = (date) => dayjs(date).isBefore(dayjs());
+const isExpiredPoint = (date) => dayjs().isAfter(date);
 
-const isActualPoint = (dateFrom, dateTo) => dayjs(dateFrom).isBefore(dayjs()) && dayjs(dateTo).isAfter(dayjs());
+const isActualPoint = (dateFrom, dateTo) => dayjs().isBefore(dateTo) && dayjs().isAfter(dateFrom);
 
-const updatePoint = (points, updatedPoint) => points.map((point) => {
-  if (point.id === updatedPoint.id) {
-    return updatePoint;
-  } else {
-    return point;
-  }
-});
+const updatePoint = (points, updatedPoint) => points.map((point) => point.id === updatedPoint.id ? updatedPoint : point);
+
+const sortByDay = (pointA, pointB) => dayjs(pointA.startDatetime).diff(dayjs(pointB.startDatetime));
+
+const sortByTime = (pointA, pointB) => dayjs(pointA.endDatetime).diff(pointA.startDatetime) - dayjs(pointB.endDatetime).diff(pointB.startDatetime);
+
+const sortByPrice = (pointA, pointB) => pointA.price - pointB.price;
 
 
 export {
@@ -77,4 +77,7 @@ export {
   isFuturePoint,
   isActualPoint,
   isExpiredPoint,
-  updatePoint};
+  updatePoint,
+  sortByDay,
+  sortByTime,
+  sortByPrice};

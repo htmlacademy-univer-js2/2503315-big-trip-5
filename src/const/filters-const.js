@@ -1,6 +1,6 @@
 import { isActualPoint, isFuturePoint, isExpiredPoint } from '../utils/utils.js';
 
-const FiltersPoint = {
+const FILTER_TYPES = {
   EVERYTHING: 'everything',
   PRESENT: 'present',
   PAST: 'past',
@@ -8,10 +8,16 @@ const FiltersPoint = {
 };
 
 const filter = {
-  [FiltersPoint.EVERYTHING]: (points) => points,
-  [FiltersPoint.PRESENT]: (points) => points.filter((point) => isActualPoint(point.startDatetime, point.endDatetime)),
-  [FiltersPoint.PAST]: (points) => points.filter((point) => isExpiredPoint(point.endDatetime)),
-  [FiltersPoint.FUTURE]: (points) => points.filter((point) => isFuturePoint(point.startDatetime)),
+  [FILTER_TYPES.EVERYTHING]: (points) => points,
+  [FILTER_TYPES.PRESENT]: (points) => points.filter((point) => isActualPoint(point.startDatetime, point.endDatetime)),
+  [FILTER_TYPES.PAST]: (points) => points.filter((point) => isExpiredPoint(point.endDatetime)),
+  [FILTER_TYPES.FUTURE]: (points) => points.filter((point) => isFuturePoint(point.startDatetime)),
 };
 
-export {FiltersPoint, filter};
+const SORT_TYPES = {
+  DAY: 'day',
+  PRICE: 'price',
+  TIME: 'time'
+};
+
+export {filter, SORT_TYPES};
