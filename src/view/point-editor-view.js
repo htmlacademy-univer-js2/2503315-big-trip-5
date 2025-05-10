@@ -1,9 +1,13 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { getFullDate } from '../utils/utils.js';
-import { EVENT_TYPES, CITIES } from '../const/points-const.js';
+import { getDestinationById } from '../mock/destination.js';
+import { EVENT_TYPES, getOfferById } from '../mock/offer.js';
 
-function createFormEditorTemplate(point) {
-  const {eventType, destination, startDatetime, endDatetime, price, offers} = point;
+function createFormEditorTemplate(state, allDestinations) {
+  const {eventType, destination, startDatetime, endDatetime, price, typeOffers} = state;
+
+  const destinationObject = getDestinationById(destination);
+  const offersObject = typeOffers.map((id) => getOfferById(id));
 
   const fullStartDate = getFullDate(startDatetime);
   const fullEndDate = getFullDate(endDatetime);
@@ -25,18 +29,18 @@ function createFormEditorTemplate(point) {
                         ${EVENT_TYPES.map((type) => `<div class="event__type-item">
                           <input id="event-type-${type.toLowerCase()}-1" class="event__${type.toLowerCase()}-input  visually-hidden" type="radio" name="event-type" value="${type.toLowerCase()}">
                           <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type.toLowerCase()}-1">${type}</label>
-                        </div>`).join('')};
+                        </div>`).join('')}
                       </fieldset>
                     </div>
                   </div>
 
                   <div class="event__field-group  event__field-group--destination">
-                    <label class="event__label  event__type-output" for="event-destination-1">
+                    <label class="event__label  event__type-output" for="event-destination-${destinationObject.id}">
                     ${eventType}
                     </label>
-                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.city}" list="destination-list-1">
-                    <datalist id="destination-list-1">
-                      ${CITIES.map((city) => `<option value="${city}"></option>`).join('')};
+                    <input class="event__input  event__input--destination" id="event-destination-${destinationObject.id}" type="text" name="event-destination" value="${destinationObject.name}" list="destination-list-${destinationObject.id}" required>
+                    <datalist id="destination-list-${destinationObject.id}">
+                      ${allDestinations.map((city) => `<option value="${city.name}"></option>`).join('')}
                     </datalist>
                   </div>
 
@@ -67,8 +71,8 @@ function createFormEditorTemplate(point) {
                     <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
                     <div class="event__available-offers">
-                    ${offers.map((offer) => `<div class="event__offer-selector">
-                      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title.toLowerCase()}-1" type="checkbox" name="event-offer-${offer.title.toLowerCase()}" checked>
+                    ${offersObject.map((offer) => `<div class="event__offer-selector">
+                      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title.toLowerCase()}-1" type="checkbox" name="event-offer-${offer.title.toLowerCase()}">
                       <label class="event__offer-label" for="event-offer-${offer.title.toLowerCase()}-1">
                         <span class="event__offer-title">${offer.title}</span>
                           &plus;&euro;&nbsp;
@@ -80,9 +84,9 @@ function createFormEditorTemplate(point) {
 
                   <section class="event__section  event__section--destination">
                     <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-                    <p class="event__destination-description">${destination.description}</p>
+                    <p class="event__destination-description">${destinationObject.description}</p>
                     <div class="event__photos-container event__photos-tape">
-                      ${destination.pictures.map((picture) => `<img class="event__photo" src="${picture}">`).join('')}
+                      ${destinationObject.pictures.map((picture) => `<img class="event__photo" src="${picture.src}">`).join('')}
                     </div>
                   </section>
                 </section>
@@ -90,24 +94,85 @@ function createFormEditorTemplate(point) {
             </li>`;
 }
 
-export default class PointEditorView extends AbstractView {
-  #point = null;
+export default class PointEditorView extends AbstractStatefulView {
+  #initialPoint = null;
+  #allOffers = null;
+  #allDestinations = [];
+  #handleFormSubmit = null;
+  #handleEditRollUp = null;
 
-  constructor({point, onSubmitClick, onRollButtonClick}) {
+  constructor({point, typeOffers, pointDestination, allOffers, allDestinations, onFormSubmit, onEditRollUp}) {
     super();
-    this.#point = point;
-
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', (evt) => {
-      evt.preventDefault();
-      onRollButtonClick();
-    });
-    this.element.querySelector('.event').addEventListener('submit', (evt) => {
-      evt.preventDefault();
-      onSubmitClick();
-    });
+    this.#initialPoint = point;
+    this._setState(PointEditorView.parsePointToState(point, pointDestination, typeOffers));
+    this.#allOffers = allOffers;
+    this.#allDestinations = allDestinations;
+    this.#handleFormSubmit = onFormSubmit;
+    this.#handleEditRollUp = onEditRollUp;
+    this._restoreHandlers();
   }
 
   get template() {
-    return createFormEditorTemplate(this.#point);
+    return createFormEditorTemplate(this._state, this.#allDestinations);
+  }
+
+  reset = (point) => this.updateElement(point);
+
+  _restoreHandlers() {
+    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editRollUpHandler);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#typeListChangeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
+    this.element.querySelector('.event__input--price').addEventListener('input', this.#priceChangeHandler);
+  }
+
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleFormSubmit();
+  };
+
+  #editRollUpHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditRollUp();
+  };
+
+  #typeListChangeHandler = (evt) => {
+    evt.preventDefault();
+    const targetType = evt.target.value;
+    const typeOffers = this.#allOffers.find((item) => item.type === targetType).offers.map((offer) => offer.id);
+    this.updateElement({
+      eventType: targetType,
+      typeOffers: typeOffers
+    });
+  };
+
+  #destinationChangeHandler = (evt) => {
+    evt.preventDefault();
+    const targetDestination = evt.target.value;
+    const newDestination = this.#allDestinations.find((item) => item.name === targetDestination);
+    this.updateElement({
+      destination: newDestination.id
+    });
+  };
+
+  #priceChangeHandler = (evt) => {
+    evt.preventDefault();
+    const newPrice = evt.target.value;
+    this._setState({
+      basePrice: newPrice
+    });
+  };
+
+  static parsePointToState(point, pointDestination, typeOffers) {
+    return {
+      ...point,
+      destination: pointDestination,
+      typeOffers
+    };
+  }
+
+  static parseStateToPoint(state) {
+    const point = {...state};
+    return point;
   }
 }

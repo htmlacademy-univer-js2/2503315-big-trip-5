@@ -1,9 +1,13 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { getDateDifference, getMonthAndDate, getTime } from '../utils/utils.js';
+import { getDestinationById } from '../mock/destination.js';
+import { getOfferById } from '../mock/offer.js';
 
 function createPointTemplate(point) {
   const {eventType, destination, startDatetime, endDatetime, price, offers, isFavorite} = point;
 
+  const destinationObject = getDestinationById(destination);
+  const offersObject = offers.map((id) => getOfferById(id));
   const startDate = getMonthAndDate(startDatetime);
   const endDate = getMonthAndDate(endDatetime);
   const startTime = getTime(startDatetime);
@@ -16,7 +20,7 @@ function createPointTemplate(point) {
                 <div class="event__type">
                   <img class="event__type-icon" width="42" height="42" src="img/icons/${eventType.toLowerCase()}.png" alt="Event type icon">
                 </div>
-                <h3 class="event__title">${eventType} ${destination.city}</h3>
+                <h3 class="event__title">${eventType} ${destinationObject.name}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
                     <time class="event__start-time" datetime="${startDatetime}">${startTime} ${startDate === endDate ? '' : startDate}</time>
@@ -30,7 +34,7 @@ function createPointTemplate(point) {
                 </p>
                 <h4 class="visually-hidden">Offers:</h4>
                 <ul class="event__selected-offers">
-                  ${offers.map((offer) => `<li class="event__offer">
+                  ${offersObject.map((offer) => `<li class="event__offer">
              <span class="event__offer-title">${offer.title}</span>
                     &plus;&euro;&nbsp;
                     <span class="event__offer-price">${offer.price}</span>
