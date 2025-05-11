@@ -1,7 +1,9 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { getFullDate } from '../utils/utils.js';
+import { getFullDate, capitalizeWord } from '../utils/utils.js';
 import { getDestinationById } from '../mock/destination.js';
 import { EVENT_TYPES, getOfferById } from '../mock/offer.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
 function createFormEditorTemplate(state, allDestinations) {
   const {eventType, destination, startDatetime, endDatetime, price, typeOffers} = state;
@@ -28,7 +30,7 @@ function createFormEditorTemplate(state, allDestinations) {
 
                         ${EVENT_TYPES.map((type) => `<div class="event__type-item">
                           <input id="event-type-${type.toLowerCase()}-1" class="event__${type.toLowerCase()}-input  visually-hidden" type="radio" name="event-type" value="${type.toLowerCase()}">
-                          <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type.toLowerCase()}-1">${type}</label>
+                          <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type.toLowerCase()}-1">${capitalizeWord(type)}</label>
                         </div>`).join('')}
                       </fieldset>
                     </div>
@@ -67,7 +69,7 @@ function createFormEditorTemplate(state, allDestinations) {
                   </button>
                 </header>
                 <section class="event__details">
-                  <section class="event__section  event__section--offers">
+                  ${offersObject.length > 0 ? `<section class="event__section  event__section--offers">
                     <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
                     <div class="event__available-offers">
@@ -80,15 +82,15 @@ function createFormEditorTemplate(state, allDestinations) {
                         </label>
                       </div>`).join('')}
                     </div>
-                  </section>
+                  </section>` : ''}
 
-                  <section class="event__section  event__section--destination">
+                  ${destinationObject.description !== '' || destinationObject.pictures.length > 0 ? `<section class="event__section  event__section--destination">
                     <h3 class="event__section-title  event__section-title--destination">Destination</h3>
                     <p class="event__destination-description">${destinationObject.description}</p>
                     <div class="event__photos-container event__photos-tape">
                       ${destinationObject.pictures.map((picture) => `<img class="event__photo" src="${picture.src}">`).join('')}
                     </div>
-                  </section>
+                  </section>` : ''}
                 </section>
               </form>
             </li>`;
@@ -100,6 +102,8 @@ export default class PointEditorView extends AbstractStatefulView {
   #allDestinations = [];
   #handleFormSubmit = null;
   #handleEditRollUp = null;
+  #datePickerStart = null;
+  #datePickerEnd = null;
 
   constructor({point, typeOffers, pointDestination, allOffers, allDestinations, onFormSubmit, onEditRollUp}) {
     super();
@@ -118,12 +122,29 @@ export default class PointEditorView extends AbstractStatefulView {
 
   reset = (point) => this.updateElement(point);
 
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datePickerStart) {
+      this.#datePickerEnd.destroy();
+      this.#datePickerStart = null;
+    }
+
+    if (this.#datePickerEnd) {
+      this.#datePickerStart.destroy();
+      this.#datePickerEnd = null;
+    }
+  }
+
   _restoreHandlers() {
     this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editRollUpHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeListChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
     this.element.querySelector('.event__input--price').addEventListener('input', this.#priceChangeHandler);
+
+    this.#setDatePickerStart();
+    this.#setDatePickerEnd();
   }
 
   #formSubmitHandler = (evt) => {
@@ -162,6 +183,48 @@ export default class PointEditorView extends AbstractStatefulView {
       basePrice: newPrice
     });
   };
+
+  #dateFromChangeHandler = ([userDate]) => {
+    this._setState({
+      startDatetime: userDate
+    });
+    this.#datePickerEnd.set('minDate', this._state.startDatetime);
+  };
+
+  #dateToChangeHandler = ([userDate]) => {
+    this._setState({
+      endDatetime: userDate
+    });
+    this.#datePickerStart.set('maxDate', this._state.endDatetime);
+  };
+
+  #setDatePickerStart() {
+    this.#datePickerStart = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        'time_24hr': true,
+        defaultDate: this._state.startDatetime,
+        onChange: this.#dateFromChangeHandler,
+        maxDate: this._state.endDatetime
+      }
+    );
+  }
+
+  #setDatePickerEnd() {
+    this.#datePickerEnd = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        'time_24hr': true,
+        defaultDate: this._state.endDatetime,
+        onChange: this.#dateToChangeHandler,
+        minDate: this._state.startDatetime
+      }
+    );
+  }
 
   static parsePointToState(point, pointDestination, typeOffers) {
     return {

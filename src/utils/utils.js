@@ -8,6 +8,8 @@ const getRandomInteger = (min, max) => {
   return Math.floor(Math.random() * (upper - lower + 1) + lower);
 };
 
+const capitalizeWord = (word) => word.charAt(0).toUpperCase() + word.slice(1);
+
 const getRandomDates = () => {
   const startDate = new Date();
   startDate.setDate(startDate.getDate() + Math.floor(Math.random() * 10 * (Math.random() < 0.5 ? -1 : 1)));
@@ -18,7 +20,7 @@ const getRandomDates = () => {
 
   const daysDifference = Math.floor(Math.random() * 10);
   const endDate = new Date(startDate);
-  endDate.setDate(startDate.getDate() + daysDifference);
+  endDate.setDate(startDate.getDate() + daysDifference + 1);
 
   endDate.setHours(Math.floor(Math.random() * 24));
   endDate.setMinutes(Math.floor(Math.random() * 60));
@@ -69,6 +71,7 @@ const sortByPrice = (pointA, pointB) => pointA.price - pointB.price;
 export {
   getRandomArrayElement,
   getRandomInteger,
+  capitalizeWord,
   getRandomDates,
   getTime,
   getMonthAndDate,
