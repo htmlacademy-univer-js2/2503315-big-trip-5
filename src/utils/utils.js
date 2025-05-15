@@ -1,3 +1,4 @@
+import { FilterType } from '../const/const';
 import dayjs from 'dayjs';
 
 const getRandomArrayElement = (items) => items[Math.floor(Math.random() * items.length)];
@@ -59,13 +60,20 @@ const isExpiredPoint = (date) => dayjs().isAfter(date);
 
 const isActualPoint = (dateFrom, dateTo) => dayjs().isBefore(dateTo) && dayjs().isAfter(dateFrom);
 
+const filter = {
+  [FilterType.EVERYTHING]: (points) => points,
+  [FilterType.PRESENT]: (points) => points.filter((point) => isActualPoint(point.startDatetime, point.endDatetime)),
+  [FilterType.PAST]: (points) => points.filter((point) => isExpiredPoint(point.endDatetime)),
+  [FilterType.FUTURE]: (points) => points.filter((point) => isFuturePoint(point.startDatetime)),
+};
+
 const updatePoint = (points, updatedPoint) => points.map((point) => point.id === updatedPoint.id ? updatedPoint : point);
 
-const sortByDay = (pointA, pointB) => dayjs(pointA.startDatetime).diff(dayjs(pointB.startDatetime));
+const sortByDay = (pointA, pointB) => dayjs(pointB.startDatetime).diff(dayjs(pointA.startDatetime));
 
-const sortByTime = (pointA, pointB) => dayjs(pointA.endDatetime).diff(pointA.startDatetime) - dayjs(pointB.endDatetime).diff(pointB.startDatetime);
+const sortByTime = (pointA, pointB) => dayjs(pointB.endDatetime).diff(pointB.startDatetime) - dayjs(pointA.endDatetime).diff(pointA.startDatetime);
 
-const sortByPrice = (pointA, pointB) => pointA.price - pointB.price;
+const sortByPrice = (pointA, pointB) => pointB.price - pointA.price;
 
 
 export {
@@ -80,6 +88,7 @@ export {
   isFuturePoint,
   isActualPoint,
   isExpiredPoint,
+  filter,
   updatePoint,
   sortByDay,
   sortByTime,

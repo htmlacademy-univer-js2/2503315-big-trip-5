@@ -1,11 +1,19 @@
 import AbstractView from '../framework/view/abstract-view';
+import { NoPointMessages } from '../const/const';
 
-function createEmptyPointListTemplate() {
-  return '<p class="trip-events__msg">Click New Event to create your first point</p>';
+function createEmptyPointListTemplate(filterType) {
+  return `<p class="trip-events__msg">${NoPointMessages[filterType.toUpperCase()]}</p>`;
 }
 
 export default class EmptyPointListView extends AbstractView {
+  #filterType = null;
+
+  constructor(filterType) {
+    super();
+    this.#filterType = filterType;
+  }
+
   get template() {
-    return createEmptyPointListTemplate();
+    return createEmptyPointListTemplate(this.#filterType.filterType);
   }
 }
