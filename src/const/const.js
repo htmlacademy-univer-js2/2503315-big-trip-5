@@ -1,5 +1,3 @@
-import { getAllOffersByType } from '../mock/offer';
-
 const FilterType = {
   EVERYTHING: 'everything',
   PRESENT: 'present',
@@ -27,7 +25,8 @@ const UserAction = {
 const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
-  MAJOR: 'MAJOR'
+  MAJOR: 'MAJOR',
+  INIT: 'INIT'
 };
 
 const NoPointMessages = {
@@ -38,14 +37,34 @@ const NoPointMessages = {
 };
 
 const NEW_POINT = {
-  id: crypto.randomUUID(),
-  eventType: 'flight',
+  type: 'flight',
   destination: '',
-  startDatetime: '',
-  endDatetime: '',
-  price: 0,
-  offers: getAllOffersByType('flight'),
+  dateFrom: '',
+  dateTo: '',
+  basePrice: 0,
+  offers: [],
   isFavorite: false
 };
 
-export {FilterType, SortType, Mode, UserAction, UpdateType, NoPointMessages, NEW_POINT};
+const Method = {
+  GET: 'GET',
+  POST: 'POST',
+  PUT: 'PUT',
+  DELETE: 'DELETE'
+};
+
+const END_POINT = 'https://24.objects.htmlacademy.pro/big-trip';
+const AUTHORIZATION = 'Basic tralalelotralala';
+
+export {
+  FilterType,
+  SortType,
+  Mode,
+  UserAction,
+  UpdateType,
+  NoPointMessages,
+  NEW_POINT,
+  Method,
+  END_POINT,
+  AUTHORIZATION
+};
