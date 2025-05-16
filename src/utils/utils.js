@@ -62,19 +62,31 @@ const isActualPoint = (dateFrom, dateTo) => dayjs().isBefore(dateTo) && dayjs().
 
 const filter = {
   [FilterType.EVERYTHING]: (points) => points,
-  [FilterType.PRESENT]: (points) => points.filter((point) => isActualPoint(point.startDatetime, point.endDatetime)),
-  [FilterType.PAST]: (points) => points.filter((point) => isExpiredPoint(point.endDatetime)),
-  [FilterType.FUTURE]: (points) => points.filter((point) => isFuturePoint(point.startDatetime)),
+  [FilterType.PRESENT]: (points) => points.filter((point) => isActualPoint(point.dateFrom, point.dateTo)),
+  [FilterType.PAST]: (points) => points.filter((point) => isExpiredPoint(point.dateTo)),
+  [FilterType.FUTURE]: (points) => points.filter((point) => isFuturePoint(point.dateFrom)),
 };
 
 const updatePoint = (points, updatedPoint) => points.map((point) => point.id === updatedPoint.id ? updatedPoint : point);
 
-const sortByDay = (pointA, pointB) => dayjs(pointB.startDatetime).diff(dayjs(pointA.startDatetime));
+const sortByDay = (pointA, pointB) => dayjs(pointB.dateFrom).diff(dayjs(pointA.dateFrom));
 
-const sortByTime = (pointA, pointB) => dayjs(pointB.endDatetime).diff(pointB.startDatetime) - dayjs(pointA.endDatetime).diff(pointA.startDatetime);
+const sortByTime = (pointA, pointB) => dayjs(pointB.dateTo).diff(pointB.dateFrom) - dayjs(pointA.dateTo).diff(pointA.dateFrom);
 
-const sortByPrice = (pointA, pointB) => pointB.price - pointA.price;
+const sortByPrice = (pointA, pointB) => pointB.basePrice - pointA.basePrice;
 
+const getDestinationById = (destinations, id) => destinations.find((item) => item.id === id);
+
+const getOfferById = (offers, id) => {
+  for (let i = 0; i < offers.length; i++) {
+    const foundOffer = offers[i].offers.find((offer) => offer.id === id);
+    if (foundOffer) {
+      return foundOffer;
+    }
+  }
+};
+
+const getAllOffersByType = (offers, type) => offers.find((item) => item.type === type).offers.map((offer) => offer.id);
 
 export {
   getRandomArrayElement,
@@ -92,4 +104,8 @@ export {
   updatePoint,
   sortByDay,
   sortByTime,
-  sortByPrice};
+  sortByPrice,
+  getDestinationById,
+  getOfferById,
+  getAllOffersByType
+};

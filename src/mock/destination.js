@@ -162,8 +162,6 @@ const CITIES = destinations.map((destination) => destination.name);
 
 const getRandomDestinationId = () => getRandomArrayElement(destinations).id;
 
-const getDestinationById = (id) => destinations.find((item) => item.id === id);
-
 const getAllDestinations = () => destinations;
 
-export {getRandomDestinationId, getDestinationById, CITIES, getAllDestinations};
+export {getRandomDestinationId, CITIES, getAllDestinations};

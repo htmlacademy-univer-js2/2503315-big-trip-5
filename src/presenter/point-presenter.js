@@ -31,6 +31,8 @@ export default class PointPresenter {
 
     this.#pointItem = new PointView({
       point: this.#point,
+      destinations: this.#allDestinations,
+      offers: this.#allOffers,
       onRollButtonClick: this.#handleRollButtonClick.bind(this),
       onFavoriteButtonClick: this.#handleFavoriteButtonClick
     });
@@ -100,14 +102,16 @@ export default class PointPresenter {
     document.addEventListener('keydown', this.#onEscKeydown);
   }
 
-  #handleFormSubmit = (update) => {
-    this.#handlePointChange(
+  #handleFormSubmit = async (update) => {
+    await this.#handlePointChange(
       UserAction.UPDATE_POINT,
       UpdateType.MINOR,
       update
     );
-    this.#replaceEditFormToPoint();
-    document.removeEventListener('keydown', this.#onEscKeydown);
+    if (update.isSaving) {
+      this.#replaceEditFormToPoint();
+      document.removeEventListener('keydown', this.#onEscKeydown);
+    }
   };
 
   #handleFavoriteButtonClick = (point) => {
@@ -125,4 +129,12 @@ export default class PointPresenter {
       point
     );
   };
+
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#pointItem.shake();
+      return;
+    }
+    this.#editForm.shake(this.#editForm.updateElement({ isDisabled: false, isSaving: false, isDeleting: false }));
+  }
 }

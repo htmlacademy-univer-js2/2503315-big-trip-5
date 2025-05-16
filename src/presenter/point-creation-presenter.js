@@ -1,26 +1,24 @@
 import PointEditorView from '../view/point-editor-view';
 import { render, remove, RenderPosition } from '../framework/render';
 import { UserAction, UpdateType } from '../const/const';
+import { getAllOffersByType } from '../utils/utils';
 
 export default class PointCreationPresenter {
   #pointListComponent = null;
   #pointEditComponent = null;
   #filterModel = null;
-  #addButton = document.querySelector('.trip-main__event-add-btn');
+  #pointsModel = null;
+  #addButton = null;
   #point = null;
-  #typeOffers = null;
-  #allOffers = null;
-  #allDestinations = null;
   #handleDataChange = null;
   #handleModeChange = null;
 
-  constructor({ filterModel, pointListComponent, point, typeOffers, allOffers, allDestinations, handleDataChange, handleModeChange }) {
+  constructor({ filterModel, pointsModel, addButton, pointListComponent, point, handleDataChange, handleModeChange }) {
     this.#filterModel = filterModel;
+    this.#pointsModel = pointsModel;
+    this.#addButton = addButton;
     this.#pointListComponent = pointListComponent;
     this.#point = point;
-    this.#typeOffers = typeOffers;
-    this.#allOffers = allOffers;
-    this.#allDestinations = allDestinations;
     this.#handleDataChange = handleDataChange;
     this.#handleModeChange = handleModeChange;
 
@@ -30,9 +28,9 @@ export default class PointCreationPresenter {
   init() {
     this.#pointEditComponent = new PointEditorView({
       point: this.#point,
-      typeOffers: this.#typeOffers,
-      allOffers: this.#allOffers,
-      allDestinations: this.#allDestinations,
+      typeOffers: getAllOffersByType(this.#pointsModel.offers, this.#point.type),
+      allOffers: this.#pointsModel.offers,
+      allDestinations: this.#pointsModel.destinations,
       onFormSubmit: this.#handleFormSubmit.bind(this),
       onDeleteClick: this.destroy
     });
@@ -70,4 +68,16 @@ export default class PointCreationPresenter {
     remove(this.#pointEditComponent);
     this.#addButton.disabled = false;
   };
+
+  setAborting() {
+    /*const resetFormState = () => {
+      this.#pointEditComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };*/
+
+    this.#pointEditComponent.shake();
+  }
 }

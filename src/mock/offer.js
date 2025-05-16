@@ -210,14 +210,5 @@ const offers = [
 const EVENT_TYPES = offers.map((item) => item.type);
 const getAllOffers = () => offers;
 const getRandomOfferType = () => getRandomArrayElement(offers).type;
-const getAllOffersByType = (type) => offers.find((item) => item.type === type).offers.map((offer) => offer.id);
-const getOfferById = (id) => {
-  for (let i = 0; i < offers.length; i++) {
-    const foundOffer = offers[i].offers.find((offer) => offer.id === id);
-    if (foundOffer) {
-      return foundOffer;
-    }
-  }
-};
 
-export { getRandomOfferType, EVENT_TYPES, getAllOffersByType, getOfferById, getAllOffers };
+export { getRandomOfferType, EVENT_TYPES, getAllOffers };
