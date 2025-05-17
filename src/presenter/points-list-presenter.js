@@ -6,7 +6,8 @@ import LoadingView from '../view/loading-view.js';
 import ErrorView from '../view/error-view.js';
 import { render, remove, RenderPosition } from '../framework/render.js';
 import { sortByDay, sortByPrice, sortByTime, filter, getAllOffersByType } from '../utils/utils.js';
-import { SortType, UpdateType, UserAction, NEW_POINT } from '../const/const.js';
+import { SortType, UpdateType, UserAction, NEW_POINT, TimeLimit } from '../const/const.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 
 export default class PointsListPresenter {
   #pointListComponent = null;
@@ -23,6 +24,10 @@ export default class PointsListPresenter {
   #currentSortType = null;
   #isLoading = true;
   #addButton = document.querySelector('.trip-main__event-add-btn');
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER_LIMIT,
+    upperLimit: TimeLimit.UPPER_LIMIT
+  });
 
   constructor({ eventsContainer, pointListComponent, pointsModel, filterModel }) {
     this.#eventsContainer = eventsContainer;
@@ -140,12 +145,8 @@ export default class PointsListPresenter {
   #clearPointList() {
     this.#pointPresenters.forEach((point) => point.destroy());
     this.#pointPresenters.clear();
+    this.#pointCreationPresenter.destroy();
   }
-
-  #handlePointChange = (updatedPoint) => {
-    this.#pointsModel.points.updatePoint(updatedPoint);
-    this.#pointPresenters.get(updatedPoint.id).init(updatedPoint);
-  };
 
   #handleModeChange = () => {
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
@@ -156,14 +157,18 @@ export default class PointsListPresenter {
     const presenter = this.#pointPresenters.get(update.id);
 
     try {
+      this.#uiBlocker.block();
       switch (actionType) {
         case UserAction.UPDATE_POINT:
+          presenter.setSaving();
           await this.#pointsModel.updatePoint(updateType, update);
           break;
         case UserAction.ADD_POINT:
+          presenter.setSaving();
           await this.#pointsModel.addPoint(updateType, update);
           break;
         case UserAction.DELETE_POINT:
+          presenter.setDeleting();
           await this.#pointsModel.deletePoint(updateType, update);
           break;
       }
@@ -173,6 +178,8 @@ export default class PointsListPresenter {
       } else {
         presenter.setAborting();
       }
+    } finally {
+      this.#uiBlocker.unblock();
     }
 
   };

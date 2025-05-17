@@ -76,6 +76,26 @@ export default class PointPresenter {
     remove(this.#editForm);
   }
 
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#pointItem.shake();
+      return;
+    }
+    this.#editForm.shake(this.#editForm.updateElement({ isDisabled: false, isSaving: false, isDeleting: false }));
+  }
+
+  setSaving() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editForm.updateElement({ isDisabled: true, isSaving: true });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editForm.updateElement({ isDisabled: true, isDeleting: true });
+    }
+  }
+
   #onEscKeydown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
@@ -129,12 +149,4 @@ export default class PointPresenter {
       point
     );
   };
-
-  setAborting() {
-    if (this.#mode === Mode.DEFAULT) {
-      this.#pointItem.shake();
-      return;
-    }
-    this.#editForm.shake(this.#editForm.updateElement({ isDisabled: false, isSaving: false, isDeleting: false }));
-  }
 }
