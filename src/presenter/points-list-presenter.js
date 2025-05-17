@@ -5,7 +5,7 @@ import EmptyPointListView from '../view/empty-point-list-view.js';
 import LoadingView from '../view/loading-view.js';
 import ErrorView from '../view/error-view.js';
 import { render, remove, RenderPosition } from '../framework/render.js';
-import { sortByDay, sortByPrice, sortByTime, filter, getAllOffersByType } from '../utils/utils.js';
+import { sort, filter, getAllOffersByType } from '../utils/utils.js';
 import { SortType, UpdateType, UserAction, NEW_POINT, TimeLimit } from '../const/const.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 
@@ -50,17 +50,17 @@ export default class PointsListPresenter {
 
   get points() {
     this.#filterType = this.#filterModel.filter;
-    const points = this.#pointsModel.points;
+    let points = this.#pointsModel.points;
 
     switch (this.#currentSortType) {
       case SortType.PRICE:
-        points.sort(sortByPrice);
+        points = sort[SortType.PRICE](points);
         break;
       case SortType.TIME:
-        points.sort(sortByTime);
+        points = sort[SortType.TIME](points);
         break;
       default:
-        points.sort(sortByDay);
+        points = sort[SortType.DAY](points);
         break;
     }
     return filter[this.#filterType](points);
