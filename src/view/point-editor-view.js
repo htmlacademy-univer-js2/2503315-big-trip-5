@@ -5,15 +5,18 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
 function createFormEditorTemplate(state, allDestinations, allOffers, typeOffers) {
-  const {type, destination, startDatetime, endDatetime, basePrice, offers} = state;
+  const {type, destination, dateFrom, dateTo, basePrice, offers, isSaving, isDeleting, isDisabled} = state;
 
   const pointDestination = getDestinationById(allDestinations, destination);
   const pointOffers = typeOffers.map((item) => getOfferById(allOffers, item));
   const eventTypes = Array.from(allOffers.map((item) => item.type));
 
-  const isValid = getFullDate(startDatetime) !== 'Invalid Date';
-  const fullStartDate = isValid ? getFullDate(startDatetime) : '';
-  const fullEndDate = isValid ? getFullDate(endDatetime) : '';
+  const isValid = getFullDate(dateFrom) !== 'Invalid Date';
+  const fullStartDate = isValid ? getFullDate(dateFrom) : '';
+  const fullEndDate = isValid ? getFullDate(dateTo) : '';
+
+  const deleteText = isDeleting ? 'Deleting...' : 'Delete';
+  const saveText = isSaving ? 'Saving...' : 'Save';
 
   return `<li class="trip-events__item">
               <form class="event event--edit" action="#" method="post">
@@ -23,14 +26,14 @@ function createFormEditorTemplate(state, allDestinations, allOffers, typeOffers)
                       <span class="visually-hidden">Choose event type</span>
                       <img class="event__type-icon" width="17" height="17" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
                     </label>
-                    <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+                    <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox" ${isDisabled ? 'disabled' : ''}>
 
                     <div class="event__type-list">
                       <fieldset class="event__type-group">
                         <legend class="visually-hidden">Event type</legend>
 
                         ${eventTypes.map((item) => `<div class="event__type-item">
-                          <input id="event-type-${item.toLowerCase()}-1" class="event__${item.toLowerCase()}-input  visually-hidden" type="radio" name="event-type" value="${item.toLowerCase()}">
+                          <input id="event-type-${item.toLowerCase()}-1" class="event__${item.toLowerCase()}-input ${isDisabled ? 'disabled' : ''} visually-hidden" type="radio" name="event-type" value="${item.toLowerCase()}">
                           <label class="event__type-label  event__type-label--${item.toLowerCase()}" for="event-type-${item.toLowerCase()}-1">${capitalizeWord(item)}</label>
                         </div>`).join('')}
                       </fieldset>
@@ -41,7 +44,7 @@ function createFormEditorTemplate(state, allDestinations, allOffers, typeOffers)
                     <label class="event__label  event__type-output" for="event-destination-1">
                     ${type}
                     </label>
-                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(pointDestination ? pointDestination.name : '')}" list="destination-list-1" required>
+                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" ${isDisabled ? 'disabled' : ''} name="event-destination" value="${he.encode(pointDestination ? pointDestination.name : '')}" list="destination-list-1" required>
                     <datalist id="destination-list-1">
                       ${allDestinations.map((city) => `<option value="${city.name}"></option>`).join('')}
                     </datalist>
@@ -49,10 +52,10 @@ function createFormEditorTemplate(state, allDestinations, allOffers, typeOffers)
 
                   <div class="event__field-group  event__field-group--time">
                     <label class="visually-hidden" for="event-start-time-1">From</label>
-                    <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${fullStartDate}">
+                    <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" ${isDisabled ? 'disabled' : ''} value="${fullStartDate}">
                     &mdash;
                     <label class="visually-hidden" for="event-end-time-1">To</label>
-                    <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${fullEndDate}">
+                    <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" ${isDisabled ? 'disabled' : ''} value="${fullEndDate}">
                   </div>
 
                   <div class="event__field-group  event__field-group--price">
@@ -60,11 +63,11 @@ function createFormEditorTemplate(state, allDestinations, allOffers, typeOffers)
                       <span class="visually-hidden">Price</span>
                       &euro;
                     </label>
-                    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}">
+                    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" ${isDisabled ? 'disabled' : ''} value="${basePrice}">
                   </div>
 
-                  <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-                  <button class="event__reset-btn" type="reset">Delete</button>
+                  <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>${saveText}</button>
+                  <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${deleteText}</button>
                   ${isValid ? `<button class="event__rollup-btn" type="button">
                     <span class="visually-hidden">Open event</span>
                   </button>` : ''}
@@ -75,7 +78,7 @@ function createFormEditorTemplate(state, allDestinations, allOffers, typeOffers)
 
                     <div class="event__available-offers">
                     ${pointOffers.map((offer) => `<div class="event__offer-selector">
-                      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title.toLowerCase()}" type="checkbox" value="${offer.id}" name="event-offer-${offer.title.toLowerCase()}" ${offers.includes(offer.id) ? 'checked' : ''}>
+                      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title.toLowerCase()}" type="checkbox" value="${offer.id}" name="event-offer-${offer.title.toLowerCase()}" ${offers.includes(offer.id) ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
                       <label class="event__offer-label" for="event-offer-${offer.title.toLowerCase()}">
                         <span class="event__offer-title">${offer.title}</span>
                           &plus;&euro;&nbsp;
@@ -196,14 +199,14 @@ export default class PointEditorView extends AbstractStatefulView {
     this._setState({
       dateFrom: userDate
     });
-    this.#datePickerEnd.set('minDate', this._state.startDatetime);
+    this.#datePickerEnd.set('minDate', this._state.dateFrom);
   };
 
   #dateToChangeHandler = ([userDate]) => {
     this._setState({
       dateTo: userDate
     });
-    this.#datePickerStart.set('maxDate', this._state.endDatetime);
+    this.#datePickerStart.set('maxDate', this._state.dateTo);
   };
 
   #offersChangeHandler = (evt) => {

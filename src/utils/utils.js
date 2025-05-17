@@ -86,7 +86,7 @@ const getOfferById = (offers, id) => {
   }
 };
 
-const getAllOffersByType = (offers, type) => offers.find((item) => item.type === type).offers.map((offer) => offer.id);
+const getAllOffersByType = (allOffers, type) => allOffers.find((item) => item.type === type).offers.map((offer) => offer.id);
 
 export {
   getRandomArrayElement,

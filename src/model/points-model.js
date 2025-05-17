@@ -71,7 +71,7 @@ export default class PointsModel extends Observable {
 
   async addPoint(updateType, point) {
     try {
-      const response = this.#pointsApiService.addPoint(point);
+      const response = await this.#pointsApiService.addPoint(point);
       const update = this.#adaptToClient(response);
       this.#points = [
         update,
@@ -84,9 +84,13 @@ export default class PointsModel extends Observable {
   }
 
   async deletePoint(updateType, point) {
-    await this.#pointsApiService.deletePoint(point);
-    this.#points = this.#points.filter((item) => item.id !== point.id);
-    this._notify(updateType, point);
+    try {
+      await this.#pointsApiService.deletePoint(point);
+      this.#points = this.#points.filter((item) => item.id !== point.id);
+      this._notify(updateType, point);
+    } catch {
+      throw new Error('Can\'t delete point');
+    }
   }
 
   #adaptToClient = (point) => {

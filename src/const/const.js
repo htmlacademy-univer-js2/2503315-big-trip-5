@@ -53,6 +53,11 @@ const Method = {
   DELETE: 'DELETE'
 };
 
+const TimeLimit = {
+  LOWER_LIMIT: 400,
+  UPPER_LIMIT: 800
+};
+
 const END_POINT = 'https://24.objects.htmlacademy.pro/big-trip';
 const AUTHORIZATION = 'Basic tralalelotralala';
 
@@ -65,6 +70,7 @@ export {
   NoPointMessages,
   NEW_POINT,
   Method,
+  TimeLimit,
   END_POINT,
   AUTHORIZATION
 };

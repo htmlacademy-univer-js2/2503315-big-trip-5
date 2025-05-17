@@ -51,9 +51,11 @@ export default class PointCreationPresenter {
       UpdateType.MAJOR,
       update
     );
-    this.#filterModel.setFilter(UpdateType.MAJOR, 'everything');
-    document.removeEventListener('keydown', this.#onEscKeydown);
-    this.destroy();
+    if (update.isSaving) {
+      this.#filterModel.setFilter(UpdateType.MAJOR, 'everything');
+      document.removeEventListener('keydown', this.#onEscKeydown);
+      this.destroy();
+    }
   };
 
   #onEscKeydown = (evt) => {
@@ -70,14 +72,6 @@ export default class PointCreationPresenter {
   };
 
   setAborting() {
-    /*const resetFormState = () => {
-      this.#pointEditComponent.updateElement({
-        isDisabled: false,
-        isSaving: false,
-        isDeleting: false,
-      });
-    };*/
-
-    this.#pointEditComponent.shake();
+    this.#pointEditComponent.shake(this.#pointEditComponent.updateElement({ isSaving: false }));
   }
 }
