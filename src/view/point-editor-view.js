@@ -224,9 +224,9 @@ export default class PointEditorView extends AbstractStatefulView {
         dateFormat: 'd/m/y H:i',
         enableTime: true,
         'time_24hr': true,
-        defaultDate: this._state.startDatetime,
+        defaultDate: this._state.dateFrom,
         onChange: this.#dateFromChangeHandler,
-        maxDate: this._state.endDatetime
+        maxDate: this._state.dateTo
       }
     );
   }
@@ -238,9 +238,9 @@ export default class PointEditorView extends AbstractStatefulView {
         dateFormat: 'd/m/y H:i',
         enableTime: true,
         'time_24hr': true,
-        defaultDate: this._state.endDatetime,
+        defaultDate: this._state.dateTo,
         onChange: this.#dateToChangeHandler,
-        minDate: this._state.startDatetime
+        minDate: this._state.dateFrom
       }
     );
   }

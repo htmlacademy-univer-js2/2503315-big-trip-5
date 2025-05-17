@@ -7,7 +7,6 @@ function createPointTemplate(point, destinations, allOffers) {
   const pointDestination = getDestinationById(destinations, destination);
   const pointOffers = offers.map((id) => getOfferById(allOffers, id));
   const startDate = getMonthAndDate(dateFrom);
-  const endDate = getMonthAndDate(dateTo);
   const startTime = getTime(dateFrom);
   const endTime = getTime(dateTo);
   const duration = getDateDifference(dateFrom, dateTo);
@@ -21,9 +20,9 @@ function createPointTemplate(point, destinations, allOffers) {
                 <h3 class="event__title">${type} ${pointDestination.name}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
-                    <time class="event__start-time" datetime="${dateFrom}">${startTime} ${startDate === endDate ? '' : startDate}</time>
+                    <time class="event__start-time" datetime="${dateFrom}">${startTime}</time>
                     &mdash;
-                    <time class="event__end-time" datetime="${dateTo}">${endTime} ${startDate === endDate ? '' : endDate}</time>
+                    <time class="event__end-time" datetime="${dateTo}">${endTime}</time>
                   </p>
                   <p class="event__duration">${duration}</p>
                 </div>

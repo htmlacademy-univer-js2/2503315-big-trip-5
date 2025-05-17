@@ -1,4 +1,4 @@
-import { FilterType } from '../const/const';
+import { FilterType, SortType } from '../const/const';
 import dayjs from 'dayjs';
 
 const getRandomArrayElement = (items) => items[Math.floor(Math.random() * items.length)];
@@ -52,6 +52,8 @@ const getTime = (date) => dayjs(date).format('HH:mm');
 
 const getMonthAndDate = (date) => dayjs(date).format('MMM DD');
 
+const getDayAndMonth = (date) => dayjs(date).format('D MMM');
+
 const getFullDate = (date) => dayjs(date).format('DD/MM/YY HH:mm');
 
 const isFuturePoint = (date) => dayjs().isBefore(date);
@@ -67,14 +69,6 @@ const filter = {
   [FilterType.FUTURE]: (points) => points.filter((point) => isFuturePoint(point.dateFrom)),
 };
 
-const updatePoint = (points, updatedPoint) => points.map((point) => point.id === updatedPoint.id ? updatedPoint : point);
-
-const sortByDay = (pointA, pointB) => dayjs(pointB.dateFrom).diff(dayjs(pointA.dateFrom));
-
-const sortByTime = (pointA, pointB) => dayjs(pointB.dateTo).diff(pointB.dateFrom) - dayjs(pointA.dateTo).diff(pointA.dateFrom);
-
-const sortByPrice = (pointA, pointB) => pointB.basePrice - pointA.basePrice;
-
 const getDestinationById = (destinations, id) => destinations.find((item) => item.id === id);
 
 const getOfferById = (offers, id) => {
@@ -88,6 +82,27 @@ const getOfferById = (offers, id) => {
 
 const getAllOffersByType = (allOffers, type) => allOffers.find((item) => item.type === type).offers.map((offer) => offer.id);
 
+const sort = {
+  [SortType.DAY]: (points) => points.sort((pointA, pointB) => dayjs(pointB.dateFrom).diff(dayjs(pointA.dateFrom))),
+  [SortType.TIME]: (points) => points.sort((pointA, pointB) => dayjs(pointB.dateTo).diff(pointB.dateFrom) - dayjs(pointA.dateTo).diff(pointA.dateFrom)),
+  [SortType.PRICE]: (points) => points.sort((pointA, pointB) => pointB.basePrice - pointA.basePrice)
+};
+
+const getRouteDates = (points) => [getDayAndMonth(points[points.length - 1].dateFrom), getDayAndMonth(points[0].dateTo)];
+
+const getRoute = (points, destinations) => {
+  const route = points.map((point) => getDestinationById(destinations, point.destination).name);
+  return route.length < 4 ? route.join(' &mdash; ') : `${route[route.length - 1]} &mdash; ... &mdash; ${route[0]}`;
+};
+
+const getRoutePrice = (points, offers) => {
+  const pointPrices = points.map((point) => Number(point.basePrice));
+  const offersPrices = points.map((point) => point.offers.map((offer) => Number(getOfferById(offers, offer).price)));
+  const basePrice = pointPrices.reduce((sum, price) => sum + price, 0);
+  const additionalPrice = offersPrices.flat().reduce((sum, price) => sum + price, 0);
+  return basePrice + additionalPrice;
+};
+
 export {
   getRandomArrayElement,
   getRandomInteger,
@@ -95,17 +110,18 @@ export {
   getRandomDates,
   getTime,
   getMonthAndDate,
+  getDayAndMonth,
   getFullDate,
   getDateDifference,
   isFuturePoint,
   isActualPoint,
   isExpiredPoint,
   filter,
-  updatePoint,
-  sortByDay,
-  sortByTime,
-  sortByPrice,
+  sort,
   getDestinationById,
   getOfferById,
-  getAllOffersByType
+  getAllOffersByType,
+  getRouteDates,
+  getRoute,
+  getRoutePrice
 };
