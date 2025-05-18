@@ -1,8 +1,8 @@
 const FilterType = {
   EVERYTHING: 'everything',
+  FUTURE: 'future',
   PRESENT: 'present',
-  PAST: 'past',
-  FUTURE: 'future'
+  PAST: 'past'
 };
 
 const SortType = {
@@ -59,7 +59,7 @@ const TimeLimit = {
 };
 
 const END_POINT = 'https://24.objects.htmlacademy.pro/big-trip';
-const AUTHORIZATION = 'Basic tralalelotralala';
+const AUTHORIZATION = 'Basic ElizabethRoseBloodflame';
 
 export {
   FilterType,

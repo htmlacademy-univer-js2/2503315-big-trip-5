@@ -5,7 +5,7 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
 function createFormEditorTemplate(state, allDestinations, allOffers, typeOffers) {
-  const {type, destination, dateFrom, dateTo, basePrice, offers, isSaving, isDeleting, isDisabled} = state;
+  const {type, destination, dateFrom, dateTo, basePrice, offers, isSaving, isDeleting, isDisabled, isPointCreation} = state;
 
   const pointDestination = getDestinationById(allDestinations, destination);
   const pointOffers = typeOffers.map((item) => getOfferById(allOffers, item));
@@ -67,7 +67,7 @@ function createFormEditorTemplate(state, allDestinations, allOffers, typeOffers)
                   </div>
 
                   <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>${saveText}</button>
-                  <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${deleteText}</button>
+                  <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${isPointCreation ? 'Cancel' : deleteText}</button>
                   ${isValid ? `<button class="event__rollup-btn" type="button">
                     <span class="visually-hidden">Open event</span>
                   </button>` : ''}
@@ -88,10 +88,10 @@ function createFormEditorTemplate(state, allDestinations, allOffers, typeOffers)
                     </div>
                   </section>` : ''}
 
-                  ${pointDestination && (pointDestination.description !== '' || pointDestination.pictures.length) > 0 ? `<section class="event__section  event__section--destination">
+                  ${pointDestination && pointDestination.description !== '' ? `<section class="event__section  event__section--destination">
                     <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-                    <p class="event__destination-description">${pointDestination.description}</p>
-                    <div class="event__photos-container event__photos-tape">
+                    <p class="event__destination-description">${pointDestination.description}</p>` : ''}
+                    ${pointDestination && pointDestination.pictures.length > 0 ? `<div class="event__photos-container event__photos-tape">
                       ${pointDestination.pictures.map((picture) => `<img class="event__photo" src="${picture.src}">`).join('')}
                     </div>
                   </section>` : ''}
@@ -111,24 +111,22 @@ export default class PointEditorView extends AbstractStatefulView {
   #datePickerStart = null;
   #datePickerEnd = null;
 
-  constructor({point, typeOffers, allOffers, allDestinations, onFormSubmit, onDeleteClick, onEditRollUp = null}) {
+  constructor({point, typeOffers, allOffers, allDestinations, handleFormSubmit, handleDeleteButtonClick, handleEditRollUp = null}) {
     super();
     this.#initialPoint = point;
     this.#typeOffers = typeOffers;
     this._setState(PointEditorView.parsePointToState(point, point.destination));
     this.#allOffers = allOffers;
     this.#allDestinations = allDestinations;
-    this.#handleFormSubmit = onFormSubmit;
-    this.#handleEditDelete = onDeleteClick;
-    this.#handleEditRollUp = onEditRollUp;
+    this.#handleFormSubmit = handleFormSubmit;
+    this.#handleEditDelete = handleDeleteButtonClick;
+    this.#handleEditRollUp = handleEditRollUp;
     this._restoreHandlers();
   }
 
   get template() {
     return createFormEditorTemplate(this._state, this.#allDestinations, this.#allOffers, this.#typeOffers);
   }
-
-  reset = (point) => this.updateElement(point);
 
   _restoreHandlers() {
     if (this.#handleEditRollUp) {
@@ -146,6 +144,8 @@ export default class PointEditorView extends AbstractStatefulView {
     this.#setDatePickerStart();
     this.#setDatePickerEnd();
   }
+
+  reset = (point) => this.updateElement(point);
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
