@@ -6,8 +6,8 @@ import { Mode, UserAction, UpdateType } from '../const/const.js';
 export default class PointPresenter {
   #point = null;
   #pointListComponent = null;
-  #editForm = null;
-  #pointItem = null;
+  #editFormComponent = null;
+  #pointComponent = null;
   #handlePointChange = null;
   #handleModeChange = null;
   #mode = Mode.DEFAULT;
@@ -26,39 +26,39 @@ export default class PointPresenter {
 
   init(point) {
     this.#point = point;
-    const prevPointItem = this.#pointItem;
-    const prevEditForm = this.#editForm;
+    const prevPointItem = this.#pointComponent;
+    const prevEditForm = this.#editFormComponent;
 
-    this.#pointItem = new PointView({
+    this.#pointComponent = new PointView({
       point: this.#point,
       destinations: this.#allDestinations,
       offers: this.#allOffers,
-      onRollButtonClick: this.#handleRollButtonClick.bind(this),
-      onFavoriteButtonClick: this.#handleFavoriteButtonClick
+      handleRollButtonClick: this.#handleRollButtonClick.bind(this),
+      handleFavoriteButtonClick: this.#handleFavoriteButtonClick
     });
 
-    this.#editForm = new PointEditorView({
+    this.#editFormComponent = new PointEditorView({
       point: this.#point,
       typeOffers: this.#typeOffers,
       allOffers: this.#allOffers,
       allDestinations: this.#allDestinations,
 
-      onFormSubmit: this.#handleFormSubmit.bind(this),
-      onDeleteClick: this.#handleDeleteButtonClick,
-      onEditRollUp: this.#replaceEditFormToPoint.bind(this)
+      handleFormSubmit: this.#handleFormSubmit.bind(this),
+      handleDeleteButtonClick: this.#handleDeleteButtonClick,
+      handleEditRollUp: this.#replaceEditFormToPoint.bind(this)
     });
 
     if (!prevPointItem || !prevEditForm) {
-      render(this.#pointItem, this.#pointListComponent.element);
+      render(this.#pointComponent, this.#pointListComponent.element);
       return;
     }
 
     if (this.#pointListComponent.element.contains(prevPointItem.element)) {
-      replace(this.#pointItem, prevPointItem);
+      replace(this.#pointComponent, prevPointItem);
     }
 
     if (this.#pointListComponent.element.contains(prevEditForm.element)) {
-      replace(this.#editForm, prevEditForm);
+      replace(this.#editFormComponent, prevEditForm);
     }
 
     remove(prevPointItem);
@@ -72,27 +72,27 @@ export default class PointPresenter {
   }
 
   destroy() {
-    remove(this.#pointItem);
-    remove(this.#editForm);
+    remove(this.#pointComponent);
+    remove(this.#editFormComponent);
   }
 
   setAborting() {
     if (this.#mode === Mode.DEFAULT) {
-      this.#pointItem.shake();
+      this.#pointComponent.shake();
       return;
     }
-    this.#editForm.shake(this.#editForm.updateElement({ isDisabled: false, isSaving: false, isDeleting: false }));
+    this.#editFormComponent.shake(this.#editFormComponent.updateElement({ isDisabled: false, isSaving: false, isDeleting: false }));
   }
 
   setSaving() {
     if (this.#mode === Mode.EDITING) {
-      this.#editForm.updateElement({ isDisabled: true, isSaving: true });
+      this.#editFormComponent.updateElement({ isDisabled: true, isSaving: true });
     }
   }
 
   setDeleting() {
     if (this.#mode === Mode.EDITING) {
-      this.#editForm.updateElement({ isDisabled: true, isDeleting: true });
+      this.#editFormComponent.updateElement({ isDisabled: true, isDeleting: true });
     }
   }
 
@@ -105,22 +105,22 @@ export default class PointPresenter {
   };
 
   #replacePointToEditForm() {
-    replace(this.#editForm, this.#pointItem);
+    replace(this.#editFormComponent, this.#pointComponent);
     this.#handleModeChange();
     this.#mode = Mode.EDITING;
   }
 
   #replaceEditFormToPoint() {
-    this.#editForm.reset(this.#point);
+    this.#editFormComponent.reset(this.#point);
     document.removeEventListener('keydown', this.#onEscKeydown);
-    replace(this.#pointItem, this.#editForm);
+    replace(this.#pointComponent, this.#editFormComponent);
     this.#mode = Mode.DEFAULT;
   }
 
-  #handleRollButtonClick() {
+  #handleRollButtonClick = () => {
     this.#replacePointToEditForm();
     document.addEventListener('keydown', this.#onEscKeydown);
-  }
+  };
 
   #handleFormSubmit = async (update) => {
     await this.#handlePointChange(

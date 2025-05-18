@@ -1,7 +1,7 @@
-import PointEditorView from '../view/point-editor-view';
-import { render, remove, RenderPosition } from '../framework/render';
-import { UserAction, UpdateType } from '../const/const';
-import { getAllOffersByType } from '../utils/utils';
+import PointEditorView from '../view/point-editor-view.js';
+import { render, remove, RenderPosition } from '../framework/render.js';
+import { UserAction, UpdateType, FilterType } from '../const/const.js';
+import { getAllOffersByType } from '../utils/utils.js';
 
 export default class PointCreationPresenter {
   #pointListComponent = null;
@@ -35,10 +35,25 @@ export default class PointCreationPresenter {
       onDeleteClick: this.destroy
     });
 
+    this.#pointEditComponent.updateElement({ isPointCreation: true });
     render(this.#pointEditComponent, this.#pointListComponent.element, RenderPosition.AFTERBEGIN);
   }
 
+  setAborting() {
+    this.#pointEditComponent.shake(this.#pointEditComponent.updateElement({ isSaving: false, isDisabled: false }));
+  }
+
+  setSaving() {
+    this.#pointEditComponent.updateElement({isSaving: true, isDisabled: true });
+  }
+
+  destroy = () => {
+    remove(this.#pointEditComponent);
+    this.#addButton.disabled = false;
+  };
+
   #handleAddButtonClick = () => {
+    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
     this.#handleModeChange();
     document.addEventListener('keydown', this.#onEscKeydown);
     this.init();
@@ -52,7 +67,7 @@ export default class PointCreationPresenter {
       update
     );
     if (update.isSaving) {
-      this.#filterModel.setFilter(UpdateType.MAJOR, 'everything');
+      this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
       document.removeEventListener('keydown', this.#onEscKeydown);
       this.destroy();
     }
@@ -61,17 +76,9 @@ export default class PointCreationPresenter {
   #onEscKeydown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
+      this.#filterModel.setFilter(UpdateType.MINOR, FilterType.EVERYTHING);
       this.destroy();
       document.removeEventListener('keydown', this.#onEscKeydown);
     }
   };
-
-  destroy = () => {
-    remove(this.#pointEditComponent);
-    this.#addButton.disabled = false;
-  };
-
-  setAborting() {
-    this.#pointEditComponent.shake(this.#pointEditComponent.updateElement({ isSaving: false }));
-  }
 }

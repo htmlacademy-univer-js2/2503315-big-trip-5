@@ -14,15 +14,14 @@ export default class PointsListPresenter {
   #emptyPointListComponent = null;
   #loadingComponent = new LoadingView();
   #errorComponent = new ErrorView();
+  #sortComponent = null;
   #pointPresenters = new Map();
   #pointCreationPresenter = null;
-  #sortComponent = null;
   #eventsContainer = null;
   #pointsModel = null;
   #filterModel = null;
   #filterType = null;
   #currentSortType = null;
-  #isLoading = true;
   #addButton = document.querySelector('.trip-main__event-add-btn');
   #uiBlocker = new UiBlocker({
     lowerLimit: TimeLimit.LOWER_LIMIT,
@@ -75,17 +74,17 @@ export default class PointsListPresenter {
   }
 
   async init() {
-    this.#onSortChange(SortType.DAY);
+    this.#handleSortTypeChange(SortType.DAY);
   }
 
   #renderPointList(isFilterTypeChanged = false) {
-    if (this.#isLoading) {
+    if (this.#pointsModel.loading) {
       this.#renderLoading();
       return;
     }
 
     if (isFilterTypeChanged) {
-      this.#currentSortType = 'day';
+      this.#currentSortType = SortType.DAY;
       this.#renderSort();
     }
 
@@ -94,7 +93,7 @@ export default class PointsListPresenter {
 
     if (this.points.length > 0) {
       this.points.forEach((point) => this.#renderPoint(point));
-    } else {
+    } else if (!isFilterTypeChanged) {
       this.#renderEmptyPointList();
     }
   }
@@ -129,11 +128,14 @@ export default class PointsListPresenter {
     if (this.#sortComponent !== null) {
       remove(this.#sortComponent);
     }
-    this.#sortComponent = new SortView(this.#currentSortType, this.#onSortChange.bind(this));
+    this.#sortComponent = new SortView({
+      currentSortType: this.#currentSortType,
+      handleSortTypeChange: this.#handleSortTypeChange.bind(this)
+    });
     render(this.#sortComponent, this.#eventsContainer);
   }
 
-  #onSortChange(sortType) {
+  #handleSortTypeChange(sortType) {
     if (this.#currentSortType !== sortType) {
       this.#currentSortType = sortType;
       this.#renderSort();
@@ -146,6 +148,11 @@ export default class PointsListPresenter {
     this.#pointPresenters.forEach((point) => point.destroy());
     this.#pointPresenters.clear();
     this.#pointCreationPresenter.destroy();
+  }
+
+  #resetPointList(isFilterTypeChanged = false) {
+    this.#clearPointList();
+    this.#renderPointList(isFilterTypeChanged);
   }
 
   #handleModeChange = () => {
@@ -164,7 +171,7 @@ export default class PointsListPresenter {
           await this.#pointsModel.updatePoint(updateType, update);
           break;
         case UserAction.ADD_POINT:
-          presenter.setSaving();
+          this.#pointCreationPresenter.setSaving();
           await this.#pointsModel.addPoint(updateType, update);
           break;
         case UserAction.DELETE_POINT:
@@ -190,15 +197,12 @@ export default class PointsListPresenter {
         this.#pointPresenters.get(update.id).init(update);
         break;
       case UpdateType.MINOR:
-        this.#clearPointList();
-        this.#renderPointList();
+        this.#resetPointList();
         break;
       case UpdateType.MAJOR:
-        this.#clearPointList();
-        this.#renderPointList(true);
+        this.#resetPointList(true);
         break;
       case UpdateType.INIT:
-        this.#isLoading = false;
         remove(this.#loadingComponent);
 
         if (update.isLoadingFailed) {
