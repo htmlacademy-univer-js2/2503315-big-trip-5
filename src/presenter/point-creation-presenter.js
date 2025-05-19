@@ -31,8 +31,8 @@ export default class PointCreationPresenter {
       typeOffers: getAllOffersByType(this.#pointsModel.offers, this.#point.type),
       allOffers: this.#pointsModel.offers,
       allDestinations: this.#pointsModel.destinations,
-      onFormSubmit: this.#handleFormSubmit.bind(this),
-      onDeleteClick: this.destroy
+      handleFormSubmit: this.#handleFormSubmit.bind(this),
+      handleDeleteButtonClick: this.destroy
     });
 
     this.#pointEditComponent.updateElement({ isPointCreation: true });
